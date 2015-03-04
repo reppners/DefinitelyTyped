@@ -14,9 +14,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // defining what exists in JSData and how it looks
-declare module JSData_ {
+declare module JSData {
 
-    class JSDataPromise<R> extends Promise<R> {
+    interface JSDataPromise<R> extends Promise<R> {
 
         // enhanced with finally
         finally<U>(finallyCb?:() => U):Promise<U>;
@@ -29,6 +29,10 @@ declare module JSData_ {
 
         // rather undocumented
         errors:DSErrors;
+
+        // those are objects containing the defined resources and adapters
+        definitions:any;
+        adapters:any;
 
         defaults:DSConfiguration;
 
@@ -394,7 +398,8 @@ declare module JSData_ {
 
 // declaring the existing global js object
 declare var JSData:{
-    DS: JSData_.DS
+    DS: JSData.DS;
+    DSErrors: JSData.DSErrors;
 };
 
 //Support node require
