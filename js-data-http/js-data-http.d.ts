@@ -38,3 +38,8 @@ declare module JSData {
 }
 
 declare var DSHttpAdapter:JSData.DSHttpAdapter;
+
+declare module "js-data-http" {
+
+    export = DSHttpAdapter;
+}

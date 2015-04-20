@@ -1,12 +1,12 @@
-/// <reference path="js-data.d.ts" />
-/// <reference path="../js-data-http/js-data-http.d.ts" />
 
 import JSData = require('js-data');
-import DSHttpAdapter = require('js-data-http')
+//TODO
+//import DSRedisAdapter = require('js-data-redis')
 var store = new JSData.DS();
 
 // register and use http by default for async operations
-store.registerAdapter('redis', new DSHttpAdapter(), {default: true});
+//TODO
+//store.registerAdapter('redis', new DSRedisAdapter(), {default: true});
 
 // simplest model definition
 var User = store.defineResource('user');
