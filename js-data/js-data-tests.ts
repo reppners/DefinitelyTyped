@@ -77,7 +77,6 @@ var UserWithMethodResource = store.defineResource<IUserWithMethod>({
 
 var userWithMethod = UserWithMethodResource.createInstance({first: 'John', last: 'Anderson'});
 
-//TODO how can we get this working?
 userWithMethod.fullName(); // "John Anderson"
 
 var store = new JSData.DS();
