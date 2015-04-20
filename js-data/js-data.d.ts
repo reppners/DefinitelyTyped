@@ -52,6 +52,8 @@ declare module JSData {
         changes(resourceName:string, id:string | number):Object;
         compute<T>(resourceName:string, idOrInstance:number | string | Object ):T;
         createInstance<T>(resourceName:string, attrs?:T, options?:DSAdapterOperationConfiguration):T;
+        // for defining resources with custom actions
+        defineResource<U extends DSResourceDefinition<any>>(config:DSResourceDefinitionConfiguration):U;
         defineResource<T>(resourceNameOrDefinition:string | DSResourceDefinitionConfiguration):DSResourceDefinition<T>;
         digest():void;
         eject<T>(resourceName:string, id:string | number, options?:DSConfiguration):T;
