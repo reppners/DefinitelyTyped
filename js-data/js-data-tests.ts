@@ -522,3 +522,29 @@ var store = new JSData.DS();
 var myResourceDefinition = store.defineResource<MyResourceDefinition>('myResource');
 
 myResourceDefinition = store.definitions.myResource;
+
+/**
+ * Custom action on datastore resource
+ */
+
+interface ActionResource {
+    someProp:string;
+}
+
+interface ActionResourceDefinition extends JSData.DSResourceDefinition<ActionResource> {
+    myAction:(payload:{data:any})=>JSData.JSDataPromise<{customResult:number}>;
+}
+
+var customActionResource = store.defineResource<ActionResourceDefinition>({
+    name: 'actionResource',
+    actions: {
+        myAction: {
+            method: 'POST'
+        }
+    }
+});
+
+customActionResource.myAction({data: 'bam!'}).then((result)=>{
+
+    var theCustomResult:number = result.customResult;
+});
