@@ -528,21 +528,32 @@ interface ActionResource extends JSData.DSInstanceShorthands<ActionResource> {
 }
 
 interface ActionResourceDefinition extends JSData.DSResourceDefinition<ActionResource> {
-    myAction:(payload:{data:any})=>JSData.JSDataPromise<{customResult:number}>;
+    myAction:JSData.DSActionFn;
+    myOtherAction:JSData.DSActionFn;
 }
+
+var myOtherAction:JSData.DSActionConfig = {
+    method: 'GET',
+    endpoint: 'goHere'
+};
 
 var customActionResource = store.defineResource<ActionResourceDefinition>({
     name: 'actionResource',
     actions: {
         myAction: {
             method: 'POST'
-        }
+        },
+        myOtherAction: myOtherAction
     }
 });
 
-customActionResource.myAction({data: 'bam!'}).then((result)=>{
+customActionResource.myAction<number>(3).then((result)=>{
 
-    var theCustomResult:number = result.customResult;
+    var theCustomResult:number = result;
+});
+
+customActionResource.myOtherAction<void>(2, {data:'blub'}).then(()=>{
+    // success
 });
 
 customActionResource.find(1).then((result)=>{
