@@ -171,6 +171,7 @@ declare module JSData {
     }
 
     //TODO how can we add this methods to generic return types?
+    //TODO custom actions can be added here by extending this interface
     export interface DSInstanceShorthands<T> {
         DSCompute():void;
         DSRefresh(options?:DSAdapterOperationConfiguration):JSDataPromise<T>;
@@ -276,6 +277,21 @@ declare module JSData {
         findAll<T>(config:DSResourceDefinition<T>, params?:DSFilterParams, options?:DSConfiguration):JSDataPromise<T>;
         update<T>(config:DSResourceDefinition<T>, id:string | number, attrs:Object, options?:DSConfiguration):JSDataPromise<T>;
         updateAll<T>(config:DSResourceDefinition<T>, attrs:Object, params?:DSFilterParams, options?:DSConfiguration):JSDataPromise<T>;
+    }
+
+    // Custom action config
+    interface DSActionConfig {
+        adapter?: string;
+        endpoint?: string;
+        pathname?: string;
+        method?: string;
+    }
+
+    // Custom action method definition
+    // options are passed to adapter.HTTP() method-call, js-data-http adapter by default uses AXIOS but can also be $http in case of angular
+    // or a custom adapter implementation. The adapter can be set via the DSActionConfig.
+    interface DSActionFn {
+        <T>(id:string | number, options?:Object):JSDataPromise<T>
     }
 }
 
