@@ -3,30 +3,38 @@
 // Definitions by: Stefan Steinhart <https://github.com/reppners>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
+/// <reference path="../localForage/localForage.d.ts" />
 /// <reference path="../angularjs/angular.d.ts" />
 
 declare module angular.localForage {
 
-    interface ILocalForageProvider {
+    interface LocalForageConfig {
+        driver?:string;
+        name?:string | number;
+        version?:number;
+        storeName?:string;
+        description?:string;
+    }
 
-        //TODO
+    interface ILocalForageProvider {
+        config(config:LocalForageConfig):void;
+        setNotify(onItemSet:boolean, onItemRemove:boolean):void;
     }
 
     interface ILocalForageService {
-        //TODO typing for driver
-        setDriver(driver:any):void;
-        driver():any;
+        setDriver(driver:string):angular.IPromise<void>;
+        driver<T>():lf.ILocalForage<T>;
 
-        setItem(key:string, value:string):angular.IPromise<void>;
-        setItem(keys:Array<string>, values:Array<string>):angular.IPromise<void>;
+        setItem(key:string, value:any):angular.IPromise<void>;
+        setItem(keys:Array<string>, values:Array<any>):angular.IPromise<void>;
 
-        getItem(key:string):angular.IPromise<string>;
-        getItem(keys:Array<string>):angular.IPromise<Array<string>>;
+        getItem(key:string):angular.IPromise<any>;
+        getItem(keys:Array<string>):angular.IPromise<Array<any>>;
 
         removeItem(key:string | Array<string>):angular.IPromise<void>;
 
-        pull(key:string):angular.IPromise<string>;
-        pull(keys:Array<string>):angular.IPromise<Array<string>>;
+        pull(key:string):angular.IPromise<any>;
+        pull(keys:Array<string>):angular.IPromise<Array<any>>;
 
         clear():angular.IPromise<void>;
 
@@ -37,5 +45,19 @@ declare module angular.localForage {
         length():angular.IPromise<number>;
 
         iterate<T>(iteratorCallback:(value:string | number, key:string)=>T):angular.IPromise<T>;
+
+        bind($scope:ng.IScope, key:string):void;
+
+        bind($scope:ng.IScope, config:{
+            key:string;
+            defaultValue:any;
+            scopeKey:string;
+            name:string;
+        }):void;
+
+        unbind($scope:ng.IScope, key:string, scopeKey?:string):void;
+
+        createInstance(config:LocalForageConfig):ILocalForageService;
+        instance(name:string):ILocalForageService;
     }
 }
