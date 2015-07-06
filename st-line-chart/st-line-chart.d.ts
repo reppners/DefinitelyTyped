@@ -7,54 +7,61 @@
 
 declare module St.LineChart {
     var Namespace: string;
-    interface VerticalMargin {
+    interface IVerticalMargin {
         top?: number;
         bottom?: number;
     }
-    interface Margin extends VerticalMargin {
+    interface IMargin extends IVerticalMargin {
         right?: number;
         left?: number;
     }
-    interface AxisOptions {
+    interface IAxisOptions {
         orientation?: string;
         tickCount?: number;
         innerTickSize?: number;
         outerTickSize?: number;
         tickFormat?: (n: number) => string;
     }
-    interface TransitionOptions {
+    interface ITransitionOptions {
         duration?: number;
         ease?: string;
     }
-    interface CommonOptions {
+    interface ICommonOptions {
         start: Date;
         end: Date;
         minTimespan?: number;
         maxTimespan?: number;
         dataSourceThrottle?: number;
-        margin?: Margin;
+        margin?: IMargin;
         zoomable?: boolean;
         transitions?: boolean;
         width?: number;
         xAccessor?: string;
         yAccessor?: string;
-        xAxisOptions?: AxisOptions;
+        xAxisOptions?: IAxisOptions;
         anchorFocusInCenter?: boolean;
     }
-    interface ChartOptions {
+    interface IChartOptions {
         id: string | number;
         grid?: boolean;
         area?: boolean;
-        margin?: VerticalMargin;
+        margin?: IVerticalMargin;
         height?: number;
         interpolation?: string;
-        transitionOptions?: TransitionOptions;
-        yAxisOptions?: AxisOptions;
+        transitionOptions?: ITransitionOptions;
+        yAxisOptions?: IAxisOptions;
     }
-    interface DataSourceDelegate {
-        (chartId: string | number, start: Date, end: Date): angular.IPromise<Array<any>>;
+    interface IDataSourceDelegate<T> {
+        (chartId: string | number, start: Date, end: Date): angular.IPromise<Array<T>>;
     }
-    interface RequestChartRedraw {
-        (chartOptions?: ChartOptions, forceRedraw?: boolean): void;
+    interface IRequestChartRedraw {
+        (chartOptions?: IChartOptions, forceRedraw?: boolean): void;
+    }
+    interface IFocusData<T> {
+        date: Date;
+        data: {
+            [chartId: string]: T;
+        };
     }
 }
+
