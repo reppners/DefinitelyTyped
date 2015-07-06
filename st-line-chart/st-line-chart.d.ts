@@ -27,8 +27,8 @@ declare module St.LineChart {
         ease?: string;
     }
     interface ICommonOptions {
-        start: Date;
-        end: Date;
+        start?: Date;
+        end?: Date;
         minTimespan?: number;
         maxTimespan?: number;
         dataSourceThrottle?: number;
@@ -40,6 +40,7 @@ declare module St.LineChart {
         yAccessor?: string;
         xAxisOptions?: IAxisOptions;
         anchorFocusInCenter?: boolean;
+        serverTimeOffset?: number;
     }
     interface IChartOptions {
         id: string | number;
@@ -64,4 +65,3 @@ declare module St.LineChart {
         };
     }
 }
-
