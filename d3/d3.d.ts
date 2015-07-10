@@ -2720,7 +2720,7 @@ declare module d3 {
         timeFormat: {
             (specifier: string): time.Format;
             utc(specifier: string): time.Format;
-            multi(formats: Array<[string, (d: Date) => boolean]>): Format;
+            multi(formats: Array<[string, (d: Date) => boolean]>): time.Format;
         }
     }
 
