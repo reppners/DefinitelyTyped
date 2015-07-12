@@ -55,8 +55,9 @@ declare module St.LineChart {
             y?: number;
         };
     }
-    interface IChartOptions {
+    interface IChartOptions<TMeta> {
         id: string | number;
+        meta?: TMeta;
         title?: string;
         titleOptions?: ITitleOptions;
         grid?: boolean;
@@ -72,11 +73,11 @@ declare module St.LineChart {
         missingDataPlaceholderText?: string;
         yScaleTopMargin?: number;
     }
-    interface IDataSourceDelegate<T> {
-        (chartId: string | number, start: Date, end: Date): angular.IPromise<Array<T>>;
+    interface IDataSourceDelegate<T, TMeta> {
+        (chartOptions: IChartOptions<TMeta>, start: Date, end: Date): angular.IPromise<Array<T>>;
     }
     interface IRequestRedrawOptions {
-        redrawChartOptions?: IChartOptions;
+        redrawChartOptions?: IChartOptions<any>;
         forceDataRefetch?: boolean;
         redrawXAxis?: boolean;
     }
@@ -85,9 +86,10 @@ declare module St.LineChart {
     }
     interface IFocusData<T> {
         date: Date;
-        data: {
-            [chartId: string]: T;
-        };
+        chartFocusData: Array<{
+            id: number | string;
+            data?: T;
+        }>;
     }
     class InterpolationMode {
         static LINEAR: string;
