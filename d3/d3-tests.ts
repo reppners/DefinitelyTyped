@@ -672,8 +672,8 @@ function dragMultiples() {
 
     function dragmove(d: { x: number; y: number }) {
         d3.select(this)
-            .attr("cx", d.x = Math.max(radius, Math.min(width - radius, (<any> d3.event).x)))
-            .attr("cy", d.y = Math.max(radius, Math.min(height - radius, (<any> d3.event).y)));
+            .attr("cx", d.x = Math.max(radius, Math.min(width - radius, (<d3.DragEvent> d3.event).x)))
+            .attr("cy", d.y = Math.max(radius, Math.min(height - radius, (<d3.DragEvent> d3.event).y)));
     }
 }
 
@@ -873,7 +873,7 @@ function populationPyramid() {
         // Allow the arrow keys to change the displayed year.
         window.focus();
         d3.select(window).on("keydown", function () {
-            switch (d3.event.keyCode) {
+            switch ((<KeyboardEvent> d3.event).keyCode) {
                 case 37: year = Math.max(year0, year - 10); break;
                 case 39: year = Math.min(year1, year + 10); break;
             }
@@ -922,7 +922,7 @@ module forcedBasedLabelPlacemant {
 
     var nodes: Node[] = [];
     var labelAnchors: LabelAnchor[] = [];
-    var labelAnchorLinks: { source: number; target: number }[] = [];
+    var labelAnchorLinks: { source: number; target: number; weight: number }[] = [];
     var links: typeof labelAnchorLinks = [];
 
     for (var i = 0; i < 30; i++) {
@@ -1266,15 +1266,15 @@ function forceDirectedVoronoi() {
     var prevEventScale = 1;
     var zoom = d3.behavior.zoom().on("zoom", function(d,i) {
         if (zoomToAdd){
-          if ((<any> d3.event).scale > prevEventScale) {
-                var angle = radius * vertices.length;
-                vertices.push({x: angle*Math.cos(angle)+(w/2), y: angle*Math.sin(angle)+(h/2)})
-            } else if (vertices.length > 2 && (<any> d3.event).scale != prevEventScale) {
-                vertices.pop();
-            }
-            force.nodes(vertices).start()
+          if ((<d3.ZoomEvent> d3.event).scale > prevEventScale) {
+            var angle = radius * vertices.length;
+            vertices.push({x: angle*Math.cos(angle)+(w/2), y: angle*Math.sin(angle)+(h/2)})
+          } else if (vertices.length > 2 && (<d3.ZoomEvent> d3.event).scale != prevEventScale) {
+            vertices.pop();
+          }
+        force.nodes(vertices).start()
         } else {
-            if ((<any> d3.event).scale > prevEventScale) {
+            if ((<d3.ZoomEvent> d3.event).scale > prevEventScale) {
                 radius+= .01
             } else {
                 radius -= .01
@@ -1285,18 +1285,18 @@ function forceDirectedVoronoi() {
             });
             force.nodes(vertices).start()
         }
-        prevEventScale = (<any> d3.event).scale;
+        prevEventScale = (<d3.ZoomEvent> d3.event).scale;
     });
 
     d3.select(window)
         .on("keydown", function() {
             // shift
-            if(d3.event.keyCode == 16) {
+            if((<KeyboardEvent> d3.event).keyCode == 16) {
                 zoomToAdd = false
             }
 
             // s
-            if(d3.event.keyCode == 83) {
+            if((<KeyboardEvent> d3.event).keyCode == 83) {
                 simulate = !simulate
                 if(simulate) {
                     force.start()
@@ -1332,7 +1332,7 @@ function forceDirectedVoronoi() {
             // drag node by dragging cell
             .call(d3.behavior.drag()
               .on("drag", function(d, i) {
-                vertices[i] = {x: vertices[i].x + (<any> d3.event).dx, y: vertices[i].y + (<any> d3.event).dy}
+                vertices[i] = {x: vertices[i].x + (<d3.DragEvent> d3.event).dx, y: vertices[i].y + (<d3.DragEvent> d3.event).dy}
               })
             )
             .style("fill", function(d, i) { return color(0) })
@@ -1450,7 +1450,7 @@ function quadtree() {
     // Collapse the quadtree into an array of rectangles.
     function nodes(quadtree: d3.geom.quadtree.Quadtree<[number, number]>) {
         var nodes: Array<{x: number; y: number; width: number; height: number}> = [];
-        quadtree.visit(function (node, x1, y1, x2, y2) {
+        quadtree.visit(function (node: d3.geom.quadtree.Node<[number, number]>, x1: number, y1: number, x2:number, y2: number) {
             nodes.push({ x: x1, y: y1, width: x2 - x1, height: y2 - y1 });
         } );
         return nodes;
@@ -1458,7 +1458,7 @@ function quadtree() {
 
     // Find the nodes within the specified rectangle.
     function search(quadtree: d3.geom.quadtree.Quadtree<{ scanned?: boolean; selected?: boolean; 0: number; 1: number }>, x0: number, y0: number, x3: number, y3: number) {
-        quadtree.visit(function (node, x1, y1, x2, y2) {
+        quadtree.visit(function (node: d3.geom.quadtree.Node<{ scanned?: boolean; selected?: boolean; 0: number; 1: number }>, x1: number, y1: number, x2:number, y2: number) {
             var p = node.point;
             if (p) {
                 p.scanned = true;
@@ -2031,7 +2031,7 @@ function irisParallel() {
         }
 
         function drag(d: string) {
-            x.range()[i] = (<any> d3.event).x;
+            x.range()[i] = (<d3.DragEvent> d3.event).x;
             traits.sort(function (a, b) { return x(a) - x(b); } );
             g.attr("transform", function (d) { return "translate(" + x(d) + ")"; } );
             foreground.attr("d", path);
@@ -2669,18 +2669,33 @@ function multiTest() {
 function testD3Events () {
     d3.select('svg')
         .on('click', () => {
-            var coords = [d3.event.pageX, d3.event.pageY];
-            console.log("clicked", d3.event.target, "at " + coords);
+            let e = <MouseEvent>d3.event;
+            var coords = [e.pageX, e.pageY];
+            console.log("clicked", e.target, "at " + coords);
         })
         .on('keypress', () => {
-            if (d3.event.shiftKey) {
-                console.log('shift + ' + d3.event.which);
+            let e = <KeyboardEvent>d3.event;
+            if (e.shiftKey) {
+                console.log('shift + ' + e.which);
             }
         });
 }
 
 function testD3MutlieTimeFormat() {
     var format = d3.time.format.multi([
+        [".%L", function(d) { return d.getMilliseconds(); }],
+        [":%S", function(d) { return d.getSeconds(); }],
+        ["%I:%M", function(d) { return d.getMinutes(); }],
+        ["%I %p", function(d) { return d.getHours(); }],
+        ["%a %d", function(d) { return d.getDay() && d.getDate() != 1; }],
+        ["%b %d", function(d) { return d.getDate() != 1; }],
+        ["%B", function(d) { return d.getMonth(); }],
+        ["%Y", function() { return true; }]
+    ]);
+}
+
+function testMultiUtcFormat() {
+    var format = d3.time.format.utc.multi([
         [".%L", function(d) { return d.getMilliseconds(); }],
         [":%S", function(d) { return d.getSeconds(); }],
         ["%I:%M", function(d) { return d.getMinutes(); }],
