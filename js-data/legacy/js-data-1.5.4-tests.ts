@@ -10,8 +10,8 @@ interface IUser {
     profile?:any;
 }
 
-interface IUserWithMethod extends IUser {
-    fullName?: () => string;
+interface IUserWithMethod {
+    fullName:()=>string;
 }
 
 interface IUserWithComputedProperty extends IUser {
@@ -20,10 +20,6 @@ interface IUserWithComputedProperty extends IUser {
 
 var store = new JSData.DS();
 
-// register and use http by default for async operations
-//TODO
-//store.registerAdapter('http', new DSHttpAdapter(), {default: true});
-
 // simplest model definition
 var User = store.defineResource<IUser>('user');
 
@@ -31,12 +27,12 @@ User.find(1).then(function (user:IUser) {
     user; // { id: 1, name: 'John' }
 });
 
-var user:IUser = User.createInstance<IUser>({name: 'John'});
+var user:IUser = User.createInstance({name: 'John'});
 
 var store = new JSData.DS();
-var User = store.defineResource('user');
-var user:IUser = User.inject<IUser>({id: 1, name: 'John'});
-var user2:IUser = User.inject<IUser>({id: 1, age: 30});
+var User2 = store.defineResource('user');
+var user:IUser = User2.inject({id: 1, name: 'John'});
+var user2:IUser = User2.inject({id: 1, age: 30});
 
 user; // User { id: 1, name: 'John', age: 30 }
 user2; // User { id: 1, name: 'John', age: 30 }
@@ -70,7 +66,7 @@ User.create({
 
 var store = new JSData.DS();
 
-var UserWithMethod = store.defineResource<IUserWithMethod>({
+var UserWithMethodResource = store.defineResource<IUserWithMethod>({
     name: 'user',
     methods: {
         fullName: function () {
@@ -79,7 +75,7 @@ var UserWithMethod = store.defineResource<IUserWithMethod>({
     }
 });
 
-var userWithMethod = UserWithMethod.createInstance<IUserWithMethod>({first: 'John', last: 'Anderson'});
+var userWithMethod = UserWithMethodResource.createInstance({first: 'John', last: 'Anderson'});
 
 userWithMethod.fullName(); // "John Anderson"
 
@@ -102,7 +98,7 @@ var UserWithComputedProperty = store.defineResource<IUserWithComputedProperty>({
     }
 });
 
-var userWithComputedProperty:IUserWithComputedProperty = UserWithComputedProperty.inject<IUserWithComputedProperty>({
+var userWithComputedProperty:IUserWithComputedProperty = UserWithComputedProperty.inject({
     id: 1,
     first: 'John',
     last: 'Anderson'
@@ -284,7 +280,7 @@ Post.filter({
     limit: PAGE_SIZE
 });
 
-var User = store.defineResource({
+var User3 = store.defineResource({
     name: 'user',
     relations: {
         hasMany: {
@@ -409,7 +405,7 @@ var store = new JSData.DS({
     }
 });
 
-var User = store.defineResource({
+var User4 = store.defineResource({
     name: 'user',
     // set just for this resource
     beforeCreate: function (resource, data, cb) {
@@ -418,7 +414,7 @@ var User = store.defineResource({
     }
 });
 
-User.create({name: 'John'}, {
+User4.create({name: 'John'}, {
     // set just for this method call
     beforeCreate: function (resource, data, cb) {
         // do something specific for this method call
@@ -522,3 +518,68 @@ var store = new JSData.DS();
 var myResourceDefinition = store.defineResource<MyResourceDefinition>('myResource');
 
 myResourceDefinition = store.definitions.myResource;
+
+/**
+ * Custom action on datastore resource
+ */
+
+interface ActionResource extends JSData.DSInstanceShorthands<ActionResource> {
+    someProp:string;
+}
+
+interface ActionResourceDefinition extends JSData.DSResourceDefinition<ActionResource> {
+    myAction:JSData.DSActionFn;
+    myOtherAction:JSData.DSActionFn;
+}
+
+var myOtherAction:JSData.DSActionConfig = {
+    method: 'GET',
+    endpoint: 'goHere'
+};
+
+var customActionResource = store.defineResource<ActionResourceDefinition>({
+    name: 'actionResource',
+    actions: {
+        myAction: {
+            method: 'POST'
+        },
+        myOtherAction: myOtherAction
+    }
+});
+
+customActionResource.myAction<number>(3).then((result)=>{
+
+    var theCustomResult:number = result;
+});
+
+customActionResource.myOtherAction<void>(2, {data:'blub'}).then(()=>{
+    // success
+});
+
+customActionResource.find(1).then((result)=>{
+
+    var aProperty = result.someProp;
+});
+
+/**
+ * Instance shorthands
+ */
+
+var customActionResourceInstance = customActionResource.get(1);
+
+customActionResourceInstance.DSCompute();
+customActionResourceInstance.DSChanges();
+customActionResourceInstance.DSChangeHistory();
+customActionResourceInstance.DSHasChanges();
+customActionResourceInstance.DSLastModified();
+customActionResourceInstance.DSLastSaved();
+customActionResourceInstance.DSPrevious();
+customActionResourceInstance.DSCreate();
+customActionResourceInstance.DSDestroy();
+customActionResourceInstance.DSLink();
+customActionResourceInstance.DSLinkInverse();
+customActionResourceInstance.DSLoadRelations('myRelation');
+customActionResourceInstance.DSRefresh();
+customActionResourceInstance.DSSave();
+customActionResourceInstance.DSUnlinkInverse();
+customActionResourceInstance.DSUpdate();

@@ -69,6 +69,7 @@ declare module JSData {
         linkAll<T>(resourceName:string, params:DSFilterParams, relations?:Array<string>):T;
         linkInverse<T>(resourceName:string, id:string | number, relations?:Array<string>):T;
         previous<T>(resourceName:string, id:string | number):T;
+        revert<T>(resourceName:string, id:string | number):T;
         unlinkInverse<T>(resourceName:string, id:string | number, relations?:Array<string>):T;
 
         registerAdapter(adapterId:string, adapter:IDSAdapter, options?:{default: boolean}):void;
@@ -115,7 +116,17 @@ declare module JSData {
     }
 
     interface DSAdapterOperationConfiguration extends DSConfiguration {
-        adapter?: string
+        adapter?: string;
+        bypassCache?: boolean;
+        cacheResponse?: boolean;
+        findStrategy?: string;
+        findFallbackAdapters?: string[];
+        strategy?: string;
+        fallbackAdapters?: string[];
+
+        params: {
+            [paramName: string]: string | number | boolean;
+        };
     }
 
     interface DSSaveConfiguration extends DSAdapterOperationConfiguration {
@@ -136,17 +147,17 @@ declare module JSData {
     interface DSResourceDefinition<T> extends DSResourceDefinitionConfiguration {
 
         //async
-        create<T>(attrs:Object, options?:DSConfiguration):JSDataPromise<T>;
-        destroy(id:string | number, options?:DSAdapterOperationConfiguration):JSDataPromise<any>;
-        destroyAll(params?:DSFilterParams, options?:DSAdapterOperationConfiguration):JSDataPromise<any>;
-        find<T>(id:string | number, options?:DSAdapterOperationConfiguration):JSDataPromise<T>;
-        findAll<T>(params?:DSFilterParams, options?:DSAdapterOperationConfiguration):JSDataPromise<Array<T>>;
-        loadRelations<T>(idOrInstance:string | number | Object, relations:string | Array<string>, options?:DSAdapterOperationConfiguration):JSDataPromise<T>;
-        update<T>(id:string | number, attrs:Object, options?:DSSaveConfiguration):JSDataPromise<T>;
-        updateAll<T>(attrs:Object, params?:DSFilterParams, options?:DSAdapterOperationConfiguration):JSDataPromise<Array<T>>;
-        reap(resourceNametions?:DSConfiguration):JSDataPromise<any>;
-        refresh<T>(id:string | number, options?:DSAdapterOperationConfiguration):JSDataPromise<T>;
-        save<T>(id:string | number, options?:DSSaveConfiguration):JSDataPromise<T>;
+        create<TInject>(attrs:TInject, options?:DSConfiguration):JSDataPromise<T>;
+        destroy(id:string | number, options?:DSAdapterOperationConfiguration):JSDataPromise<void>;
+        destroyAll(params?:DSFilterParams, options?:DSAdapterOperationConfiguration):JSDataPromise<void>;
+        find(id:string | number, options?:DSAdapterOperationConfiguration):JSDataPromise<T>;
+        findAll(params?:DSFilterParams, options?:DSAdapterOperationConfiguration):JSDataPromise<Array<T>>;
+        loadRelations(idOrInstance:string | number | Object, relations:string | Array<string>, options?:DSAdapterOperationConfiguration):JSDataPromise<T>;
+        update(id:string | number, attrs:Object, options?:DSSaveConfiguration):JSDataPromise<T>;
+        updateAll(attrs:Object, params?:DSFilterParams, options?:DSAdapterOperationConfiguration):JSDataPromise<Array<T>>;
+        reap(options?:DSConfiguration):JSDataPromise<any>;
+        refresh(id:string | number, options?:DSAdapterOperationConfiguration):JSDataPromise<T>;
+        save(id:string | number, options?:DSSaveConfiguration):JSDataPromise<T>;
 
         // sync
         changeHistory(id?:string | number):Array<Object>;
@@ -154,22 +165,43 @@ declare module JSData {
         compute<T>(idOrInstance:number | string | Object ):T;
         createInstance<T>(attrs?:T, options?:DSAdapterOperationConfiguration):T;
         digest():void;
-        eject<T>(id:string | number, options?:DSConfiguration):T;
-        ejectAll<T>(params:DSFilterParams, options?:DSConfiguration):Array<T>;
-        filter<T>(params:DSFilterParams, options?:DSConfiguration):Array<T>;
-        get<T>(id:string | number, options?:DSConfiguration):T;
-        getAll<T>(ids?:Array<string | number>):Array<T>;
+        eject(id:string | number, options?:DSConfiguration):T;
+        ejectAll(params:DSFilterParams, options?:DSConfiguration):Array<T>;
+        filter(params:DSFilterParams, options?:DSConfiguration):Array<T>;
+        get(id:string | number, options?:DSConfiguration):T;
+        getAll(ids?:Array<string | number>):Array<T>;
         hasChanges(id:string | number):boolean;
         inject<T>(attrs:T, options?:DSConfiguration):T;
         inject<T>(items:Array<T>, options?:DSConfiguration):Array<T>;
         is(object:Object): boolean;
         lastModified(id?:string | number):number; // timestamp
         lastSaved(id?:string | number):number; // timestamp
-        link<T>(id:string | number, relations?:Array<string>):T;
-        linkAll<T>(params:DSFilterParams, relations?:Array<string>):T;
-        linkInverse<T>(id:string | number, relations?:Array<string>):T;
-        previous<T>(id:string | number):T;
-        unlinkInverse<T>(id:string | number, relations?:Array<string>):T;
+        link(id:string | number, relations?:Array<string>):T;
+        linkAll(params:DSFilterParams, relations?:Array<string>):T;
+        linkInverse(id:string | number, relations?:Array<string>):T;
+        previous(id:string | number):T;
+        unlinkInverse(id:string | number, relations?:Array<string>):T;
+    }
+
+    //TODO how can we add this methods to generic return types?
+    //TODO custom actions can be added here by extending this interface
+    export interface DSInstanceShorthands<T> {
+        DSCompute():void;
+        DSRefresh(options?:DSAdapterOperationConfiguration):JSDataPromise<T>;
+        DSSave(options?:DSSaveConfiguration):JSDataPromise<T>;
+        DSUpdate(options?:DSSaveConfiguration):JSDataPromise<T>;
+        DSDestroy(options?:DSAdapterOperationConfiguration):JSDataPromise<void>;
+        DSCreate(options?:DSConfiguration):JSDataPromise<T>;
+        DSLoadRelations(relations:string | Array<string>, options?:DSAdapterOperationConfiguration):JSDataPromise<T>;
+        DSChangeHistory():Array<Object>;
+        DSChanges():Object;
+        DSHasChanges():boolean;
+        DSLastModified():number; // timestamp
+        DSLastSaved():number; // timestamp
+        DSLink(relations?:Array<string>):T;
+        DSLinkInverse(relations?:Array<string>):T;
+        DSPrevious():T;
+        DSUnlinkInverse(relations?:Array<string>):T;
     }
 
     interface DSFilterParams {
@@ -182,6 +214,10 @@ declare module JSData {
 
         orderBy?: string | Array<string> | Array<Array<string>>;
         sort?: string | Array<string> | Array<Array<string>>;
+    }
+
+    interface DSFilterParamsForAllowSimpleWhere {
+        [key: string]: string | number;
     }
 
     interface IDSResourceLifecycleValidateEventHandlers {
@@ -267,8 +303,22 @@ declare module JSData {
         findAll<T>(config:DSResourceDefinition<T>, params?:DSFilterParams, options?:DSConfiguration):JSDataPromise<T>;
 
         update<T>(config:DSResourceDefinition<T>, id:string | number, attrs:Object, options?:DSConfiguration):JSDataPromise<T>;
-
         updateAll<T>(config:DSResourceDefinition<T>, attrs:Object, params?:DSFilterParams, options?:DSConfiguration):JSDataPromise<T>;
+    }
+
+    // Custom action config
+    interface DSActionConfig {
+        adapter?: string;
+        endpoint?: string;
+        pathname?: string;
+        method?: string;
+    }
+
+    // Custom action method definition
+    // options are passed to adapter.HTTP() method-call, js-data-http adapter by default uses AXIOS but can also be $http in case of angular
+    // or a custom adapter implementation. The adapter can be set via the DSActionConfig.
+    interface DSActionFn {
+        <T>(id:string | number, options?:Object):JSDataPromise<T>
     }
 }
 
