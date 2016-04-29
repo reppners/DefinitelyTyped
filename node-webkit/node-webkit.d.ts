@@ -1,23 +1,9 @@
 // Type definitions for node-webkit
 // Project: https://github.com/rogerwang/node-webkit
-// Definitions by: Pedro Casaubon <https://github.com/xperiments>,
-//                 Stefan Steinhart <https://github.com/reppners>
-// Definitions: https://github.com/borisyankov/DefinitelyTyped
+// Definitions by: Pedro Casaubon <https://github.com/xperiments>
+// Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 declare module "nw.gui" {
-    export = NwGui;
-}
-
-// save reference to HTML Window before redefining Window as a Node Webkit Window
-interface HtmlWindow extends Window {
-
-}
-
-interface Window {
-    require(module_path:string):any;
-}
-
-declare module NwGui {
 
     interface IEventEmitter {
         addListener(event: string, listener: Function): EventEmitter;
@@ -41,41 +27,6 @@ declare module NwGui {
         emit(event: string, ...args: any[]): boolean;
     }
 
-    export interface App {
-        argv: any;
-        fullArgv: any;
-        dataPath: string;
-        manifest: any;
-        clearCache(): void;
-        closeAllWindows(): void;
-        crashBrowser(): void;
-        crashRenderer(): void;
-        getProxyForURL(url: string): void;
-        quit(): void;
-        setCrashDumpDir(dir: string): void;
-        addOriginAccessWhitelistEntry(
-            sourceOrigin: string
-            , destinationProtocol: string
-            , destinationHost: string
-            , allowDestinationSubdomains: boolean
-        ): void;
-        removeOriginAccessWhitelistEntry(
-            sourceOrigin: string
-            , destinationProtocol: string
-            , destinationHost: string
-            , allowDestinationSubdomains: boolean
-        ): void;
-        registerGlobalHotKey(shortcut: Shortcut): void;
-        unregisterGlobalHotKey(shortcut: Shortcut): void;
-    }
-
-    export class Clipboard {
-        static get(): Clipboard;
-        get(type?: string): string;
-        set(data: string, type?: string): void;
-        clear(): void;
-    }
-
     export interface MenuConfig {
         type?: string;
     }
@@ -83,19 +34,6 @@ declare module NwGui {
     export interface HideMenusOptions {
         hideEdit: boolean;
         hideWindow: boolean;
-    }
-
-    export class Menu {
-        constructor(config?: MenuConfig);
-        items: MenuItem[];
-        append(item: MenuItem): void;
-        remove(item: MenuItem): void;
-        insert(item: MenuItem, atPosition: number): void;
-        removeAt(index: number): void;
-        popup(x: number, y: number): void;
-        // since v0.10.0-rc1
-        createMacBuiltin(appname: string, options?: HideMenusOptions): void;
-
     }
 
     export interface MenuItemConfig {
@@ -125,10 +63,23 @@ declare module NwGui {
         modifiers: string;
     }
 
+    export class Menu {
+        constructor(config?: MenuConfig);
+        items: MenuItem[];
+        append(item: MenuItem): void;
+        remove(item: MenuItem): void;
+        insert(item: MenuItem, atPosition: number): void;
+        removeAt(index: number): void;
+        popup(x: number, y: number): void;
+        // since v0.10.0-rc1
+        createMacBuiltin(appname: string, options?: HideMenusOptions): void;
+
+    }
+
     export interface ShortcutOption {
         key: string;
-        active?: Function;
-        failed?: Function;
+        active: Function;
+        failed: Function;
     }
 
     export class Shortcut extends EventEmitter {
@@ -136,54 +87,6 @@ declare module NwGui {
         key: string;
         active: Function;
         failed: Function;
-    }
-
-    interface Shell {
-        openExternal(uri: string): void;
-        openItem(file_path: string): void;
-        showItemInFolder(file_path: string): void;
-    }
-
-    interface ScreenObject {
-        id: number;
-        bounds: {
-            x: number;
-            y: number;
-            width: number;
-            height: number;
-        };
-        work_area: {
-            x: number;
-            y: number;
-            width: number;
-            height: number;
-        };
-        scaleFactor: number;
-        isBuiltIn: boolean;
-    }
-
-    export class Screen {
-        static Init(): void;
-        static screens: Array<ScreenObject>;
-        static on(event: string, listener: Function): EventEmitter;
-    }
-
-    export interface TrayOption {
-        title?: string;
-        tooltip?: string;
-        icon?: string;
-        alticon?: string;
-        menu?: Menu;
-    }
-
-    export class Tray implements TrayOption {
-        constructor(option: TrayOption);
-        title: string;
-        tooltip: string;
-        icon: string;
-        alticon: string;
-        menu: Menu;
-        remove(): void;
     }
 
     export interface WindowManifestOptions {
@@ -202,15 +105,14 @@ declare module NwGui {
     }
 
     export class Window extends EventEmitter {
-        static get(windowObject?: any): NwGui.Window;
-        static open(url: string, options?: WindowManifestOptions): NwGui.Window;
+        static get(windowObject?: any): Window;
+        static open(url: string, options?: WindowManifestOptions): Window;
         x: number;
         y: number;
         width: number;
         height: number;
         title: string;
         menu: Menu;
-        window:HtmlWindow;
         isFullScreen: boolean;
         isKioskMode: boolean;
         zoomLevel: number;
@@ -254,6 +156,66 @@ declare module NwGui {
         eval(frame: HTMLIFrameElement, script: string): void;
     }
 
-    export var App: NwGui.App;
-    export var Shell: NwGui.Shell;
+    export interface App {
+        argv: any;
+        fullArgv: any;
+        dataPath: string;
+        manifest: any;
+        clearCache(): void;
+        closeAllWindows(): void;
+        crashBrowser(): void;
+        crashRenderer(): void;
+        getProxyForURL(url: string): void;
+        quit(): void;
+        setCrashDumpDir(dir: string): void;
+        addOriginAccessWhitelistEntry(
+            sourceOrigin: string
+            , destinationProtocol: string
+            , destinationHost: string
+            , allowDestinationSubdomains: boolean
+            ): void;
+        removeOriginAccessWhitelistEntry(
+            sourceOrigin: string
+            , destinationProtocol: string
+            , destinationHost: string
+            , allowDestinationSubdomains: boolean
+            ): void;
+        registerGlobalHotKey(shortcut: Shortcut): void;
+        unregisterGlobalHotKey(shortcut: Shortcut): void;
+    }
+
+    export class Clipboard {
+        static get(): Clipboard;
+        get(type?: string): string;
+        set(data: string, type?: string): void;
+        clear(): void;
+    }
+
+    export interface TrayOption {
+        title?: string;
+        tooltip?: string;
+        icon?: string;
+        alticon?: string;
+        menu?: Menu;
+    }
+
+    export class Tray implements TrayOption {
+        constructor(option: TrayOption);
+        title: string;
+        tooltip: string;
+        icon: string;
+        alticon: string;
+        menu: Menu;
+        remove(): void;
+    }
+
+    interface Shell {
+        openExternal(uri: string): void;
+        openItem(file_path: string): void;
+        showItemInFolder(file_path: string): void;
+    }
+
+    export var App: App;
+    export var Shell: Shell;
+
 }
